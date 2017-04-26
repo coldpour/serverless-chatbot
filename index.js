@@ -5,28 +5,7 @@ const fs = require('fs');
 const aws = require('aws-sdk');
 const qs = require('querystring');
 const s3 = new aws.S3();
-const kms = new aws.KMS();
-
-const decryptChatBotToken = function() {
-  console.log('Decrypting chat bot token');
-
-  const params = {
-    CiphertextBlob: new Buffer(process.env.BOT_ACCESS_TOKEN, 'base64')
-  };
-
-  console.log('params', params);
-
-  return new Promise((resolve, reject) => {
-    kms.decrypt(params, function(err, data) {
-      console.log('done decrypting');
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data.Plaintext.toString('utf-8'));
-      }
-    });
-  });
-};
+const decrypt = require('./decrypt');
 
 const downloadFileToSystem = function(token, path, filename) {
     console.log('Downloading image to temp storage');
@@ -112,7 +91,7 @@ module.exports.endpoint = (event, context, callback) => {
         const channel = request.event.channel;
         let decrypted_token = null;
 
-        decryptChatBotToken()
+        decrypt(process.env.BOT_ACCESS_TOKEN)
             .then((token) => decrypted_token = token)
             .then(() => downloadFileToSystem(decrypted_token, path, filename))
             .then(() => uploadToBucket(filename))

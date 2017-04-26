@@ -23,6 +23,7 @@ custom:
   crypt:
     aws:
       kmsKeyId: arn:aws:kms:us-east-1:037512282139:key/e831b900-d580-4bf6-bfa2-8cdd4a719c4a
+  encryptedBotToken: 'AQECAHgu8x2M+QouFOHYN2Zcp/Nn7FIFrbKrbg5BM3ZJI3QJbQAAAIkwgYYGCSqGSIb3DQEHBqB5MHcCAQAwcgYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAytIYgcslp7j7Vwi0UCARCARcuH8W1bhAODRgBLv7nf72SZ5Ea6xpyjPIABf2IywyCnY/5d02dP+qlWK5zarM2jzLqF2aLXlxKYB1qyulgaodX4VPiidg=='
   uploadBucket: ${self:service}-${self:provider.stage}-uploads-flibbityjibbitz
   transformBucket: ${self:service}-${self:provider.stage}-transformed-flibbityjibbitz
 plugins:
@@ -38,7 +39,7 @@ functions:
         method: post
     environment:
       POST_MESSAGE_URL: 'https://slack.com/api/chat.postMessage?'
-      BOT_ACCESS_TOKEN: 'AQECAHgu8x2M+QouFOHYN2Zcp/Nn7FIFrbKrbg5BM3ZJI3QJbQAAAIkwgYYGCSqGSIb3DQEHBqB5MHcCAQAwcgYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAytIYgcslp7j7Vwi0UCARCARcuH8W1bhAODRgBLv7nf72SZ5Ea6xpyjPIABf2IywyCnY/5d02dP+qlWK5zarM2jzLqF2aLXlxKYB1qyulgaodX4VPiidg=='
+      BOT_ACCESS_TOKEN: ${self:custom.encryptedBotToken}
       VERIFICATION_TOKEN: 'gmoXZszW17kNPuVz9xegceQQ'
       UPLOAD_BUCKET: ${self:custom.uploadBucket}
       SLACK_HOSTNAME: 'files.slack.com'
@@ -56,6 +57,12 @@ functions:
         event: s3:ObjectCreated:*
   slackupdate:
     handler: slackupdate.execute
+    environment:
+      POST_MESSAGE_URL: 'https://slack.com/api/chat.postMessage?'
+      CHANNEL_ID: 'C54PYPY0K'
+      BOT_ACCESS_TOKEN: ${self:custom.encryptedBotToken}
+      SHORTENER_API_KEY: 'AQECAHgu8x2M+QouFOHYN2Zcp/Nn7FIFrbKrbg5BM3ZJI3QJbQAAAIYwgYMGCSqGSIb3DQEHBqB2MHQCAQAwbwYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAwV2YyNYaG1KspUn9sCARCAQtdhaTfUmLJ0GkKWor5YAelnW4a0C/2c+DG3bktwhctpUEWXtDaqlJqjRiUpF7gqSOWgBfMoHaNSb3fBIUwEWWR9KQ=='
+      SHORTENER_API_URL: 'https://www.googleapis.com/urlshortener/v1/url?'
     events:
     - s3:
         bucket: ${self:custom.transformBucket}
