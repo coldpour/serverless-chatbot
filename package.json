@@ -1,0 +1,22 @@
+{
+  "name": "serverless-chatbot",
+  "version": "1.0.0",
+  "description": "Serverless Chatbot",
+  "main": "faceswap.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coldpour/serverless-chatbot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/coldpour/serverless-chatbot/issues"
+  },
+  "homepage": "https://github.com/coldpour/serverless-chatbot#readme",
+  "dependencies": {
+    "gm": "1.23.0"
+  }
+}
