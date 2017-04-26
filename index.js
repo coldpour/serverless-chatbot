@@ -5,8 +5,30 @@ const fs = require('fs');
 const aws = require('aws-sdk');
 const qs = require('querystring');
 const s3 = new aws.S3();
+const kms = new aws.KMS();
 
-const downloadFileToSystem = function(path, filename) {
+const decryptChatBotToken = function() {
+  console.log('Decrypting chat bot token');
+
+  const params = {
+    CiphertextBlob: new Buffer(process.env.BOT_ACCESS_TOKEN, 'base64')
+  };
+
+  console.log('params', params);
+
+  return new Promise((resolve, reject) => {
+    kms.decrypt(params, function(err, data) {
+      console.log('done decrypting');
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data.Plaintext.toString('utf-8'));
+      }
+    });
+  });
+};
+
+const downloadFileToSystem = function(token, path, filename) {
     console.log('Downloading image to temp storage');
 
     const file = fs.createWriteStream(process.env.TEMP_FOLDER + filename);
@@ -15,7 +37,7 @@ const downloadFileToSystem = function(path, filename) {
         hostname: process.env.SLACK_HOSTNAME,
         path: path,
         headers: {
-            authorization: 'Bearer ' + process.env.BOT_ACCESS_TOKEN
+            authorization: 'Bearer ' + token
         }
     };
 
@@ -56,12 +78,12 @@ const uploadToBucket = function(filename) {
     });
 };
 
-const updateStatusInSlack = function(filename, channel) {
+const updateStatusInSlack = function(token, filename, channel) {
     console.log('Sending status message to slack');
 
     return new Promise((resolve, reject) => {
         const response = {
-            token: process.env.BOT_ACCESS_TOKEN,
+            token,
             channel: channel,
             text: 'I am working on ' + filename + '... should be done soon.'
         };
@@ -88,10 +110,13 @@ module.exports.endpoint = (event, context, callback) => {
         const path = request.event.file.url_private_download;
         const filename = request.event.file.name;
         const channel = request.event.channel;
+        let decrypted_token = null;
 
-        downloadFileToSystem(path, filename)
+        decryptChatBotToken()
+            .then((token) => decrypted_token = token)
+            .then(() => downloadFileToSystem(decrypted_token, path, filename))
             .then(() => uploadToBucket(filename))
-            .then(() => updateStatusInSlack(filename, channel))
+            .then(() => updateStatusInSlack(decrypted_token, filename, channel))
             .then(() => {
                 console.log('Returning result');
                 callback(null, {

@@ -20,8 +20,13 @@ provider:
     - s3:PutObject
     Resource: arn:aws:s3:::${self:custom.transformBucket}/*
 custom:
+  crypt:
+    aws:
+      kmsKeyId: arn:aws:kms:us-east-1:037512282139:key/e831b900-d580-4bf6-bfa2-8cdd4a719c4a
   uploadBucket: ${self:service}-${self:provider.stage}-uploads-flibbityjibbitz
   transformBucket: ${self:service}-${self:provider.stage}-transformed-flibbityjibbitz
+plugins:
+  - serverless-plugin-crypt
 functions:
   bot:
     handler: bot.endpoint
@@ -33,7 +38,7 @@ functions:
         method: post
     environment:
       POST_MESSAGE_URL: 'https://slack.com/api/chat.postMessage?'
-      BOT_ACCESS_TOKEN: 'xoxb-174226405360-eZoRsgABNg8rwLnemgBMQFqb'
+      BOT_ACCESS_TOKEN: 'AQECAHgu8x2M+QouFOHYN2Zcp/Nn7FIFrbKrbg5BM3ZJI3QJbQAAAIkwgYYGCSqGSIb3DQEHBqB5MHcCAQAwcgYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAytIYgcslp7j7Vwi0UCARCARcuH8W1bhAODRgBLv7nf72SZ5Ea6xpyjPIABf2IywyCnY/5d02dP+qlWK5zarM2jzLqF2aLXlxKYB1qyulgaodX4VPiidg=='
       VERIFICATION_TOKEN: 'gmoXZszW17kNPuVz9xegceQQ'
       UPLOAD_BUCKET: ${self:custom.uploadBucket}
       SLACK_HOSTNAME: 'files.slack.com'
