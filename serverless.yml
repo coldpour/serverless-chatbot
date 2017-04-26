@@ -59,7 +59,16 @@ functions:
   bot:
     handler: bot.endpoint
   hello:
-    handler: index.hello
+    handler: index.endpoint
+    events:
+    - http:
+        path: echo
+        method: post
+    environment:
+      POST_MESSAGE_URL: 'https://slack.com/api/chat.postMessage?'
+      BOT_ACCESS_TOKEN: 'xoxb-174226405360-eZoRsgABNg8rwLnemgBMQFqb'
+      BOT_ID: 'U546NBXAL'
+      VERIFICATION_TOKEN: 'gmoXZszW17kNPuVz9xegceQQ'
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
